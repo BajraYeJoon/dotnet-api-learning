@@ -51,7 +51,7 @@ namespace stream.Controllers
             //create claims for the token 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.Username)
+                new(ClaimTypes.Name, user.Username)
             };
 
             //generate key

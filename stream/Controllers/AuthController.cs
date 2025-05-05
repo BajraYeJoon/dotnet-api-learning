@@ -31,12 +31,24 @@ namespace stream.Controllers
         }
 
         [HttpPost("sign-in")]
-        public async Task<ActionResult<string>> 
+        public async Task<ActionResult<RefreshTokenDto>> 
             SignIn(UserDto request)
         {
             var token = await authService.LoginAsync(request);
             if(token is null)
                 return BadRequest("Invalid credentials");
+
+            return Ok(token);
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<RefreshTokenDto>> RefreshToken(RefreshTokenRequestDto request)
+        {
+            var token = await authService.RefreshTokenAsync(request);
+            if (token is null || token.AccessToken is null || token.RefreshToken is null)
+            {
+                return Unauthorized("Invalid refresh token");
+            }
 
             return Ok(token);
         }

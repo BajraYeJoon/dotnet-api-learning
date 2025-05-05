@@ -48,6 +48,13 @@ namespace stream.Controllers
             return Ok("Authenticated");
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin")]
+        public IActionResult AdminEndpoint()
+        {
+            return Ok("Hmm you are an admin");
+        }
+
 
     }
 }

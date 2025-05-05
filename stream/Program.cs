@@ -1,4 +1,7 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using stream.Data;
 using stream.Services;
@@ -14,6 +17,22 @@ builder.Services.AddOpenApi();
 //first build the db so
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("UserDatabase")));
+
+//for the authorization bearer
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+                ValidateIssuer = true,
+                ValidIssuer = builder.Configuration["AppSettings:Issuer"],
+                ValidateAudience = true,
+                ValidAudience = builder.Configuration["AppSettings:Audience"],
+                ValidateIssuerSigningKey = true,
+                ValidateLifetime = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes((builder.Configuration["AppSettings:Token"]!)))
+        };
+    });
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 

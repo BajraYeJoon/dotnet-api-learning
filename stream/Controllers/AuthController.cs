@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using stream.Entities;
 using stream.Models;
 using stream.Services;
@@ -13,6 +14,14 @@ namespace stream.Controllers
         [HttpPost("sign-up")]
         public async Task<ActionResult<User>> SignUp(UserDto request)
         {
+
+            // Check if the model is valid
+            if (!ModelState.IsValid)
+            {
+                // Return validation errors as a 400 Bad Request response
+                return BadRequest(ModelState);
+            }
+
             var user = await authService.RegisterAync(request);
             if (user is null)
             {
@@ -32,7 +41,12 @@ namespace stream.Controllers
             return Ok(token);
         }
 
-
+        [Authorize]
+        [HttpGet]
+        public IActionResult AuthenticatedEndpoint()
+        {
+            return Ok("Authenticated");
+        }
 
 
     }

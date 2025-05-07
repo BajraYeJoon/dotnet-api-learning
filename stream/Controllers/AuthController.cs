@@ -12,22 +12,30 @@ namespace stream.Controllers
     {
 
         [HttpPost("sign-up")]
-        public async Task<ActionResult<User>> SignUp(UserDto request)
+        public async Task<ActionResult<ApiResponse<UserSignUpResponseDto>>> SignUp(UserDto request)
         {
 
-            // Check if the model is valid
             if (!ModelState.IsValid)
             {
-                // Return validation errors as a 400 Bad Request response
-                return BadRequest(ModelState);
+                return BadRequest(new ApiResponse<UserSignUpResponseDto>
+                {
+                    Message = "Validation failed",
+                    Success = false
+                });
             }
 
-            var user = await authService.RegisterAync(request);
+            var user = await authService.RegisterAsync(request);
             if (user is null)
             {
                 return BadRequest("User already exists");
             }
-            return Ok(user);
+
+            var responseAfterSignUp = new UserSignUpResponseDto
+            {
+                Id = user.Id,
+                Username = user.Username
+            };
+            return Ok(responseAfterSignUp);
         }
 
         [HttpPost("sign-in")]

@@ -5,8 +5,8 @@ namespace stream.Services
 {
     public interface IAuthService
     {
-        Task<User?> RegisterAsync(UserDto request);
-        Task<RefreshTokenDto?> LoginAsync(UserDto request);
+        Task<User?> RegisterAsync(SignUpDto request);
+        Task<RefreshTokenDto?> LoginAsync(LoginDto request);
 
         Task<RefreshTokenDto?> RefreshTokenAsync(RefreshTokenRequestDto request);
     }

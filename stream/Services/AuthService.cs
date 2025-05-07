@@ -13,7 +13,7 @@ namespace stream.Services
 {
     public class AuthService(AppDbContext context, IConfiguration configuration) : IAuthService
     {
-        public async Task<RefreshTokenDto?> LoginAsync(UserDto request)
+        public async Task<RefreshTokenDto?> LoginAsync(LoginDto request)
         {
             var user = await context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
             if (user is null)
@@ -43,7 +43,7 @@ namespace stream.Services
             return response;
         }
 
-        public async Task<User?> RegisterAync(UserDto request)
+        public async Task<User?> RegisterAsync(SignUpDto request)
         {
             if (await context.Users.AnyAsync(n => n.Username == request.Username))
                 return null;
@@ -72,7 +72,7 @@ namespace stream.Services
             return await RefreshTokenDto(user);
         }
 
-        private string GenerateRefreshToken()
+        private static string GenerateRefreshToken()
         {
             var randomNumber = new byte[32];
             using var rng = RandomNumberGenerator.Create();
@@ -85,7 +85,7 @@ namespace stream.Services
         {
             var refreshToken = GenerateRefreshToken();
             user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
             await context.SaveChangesAsync();
             return refreshToken;
         }

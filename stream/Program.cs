@@ -5,18 +5,22 @@ using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using stream.Data;
 using stream.Services;
+using FluentValidation;
+using stream.validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+// In Program.cs or Startup.cs
+builder.Services.AddValidatorsFromAssemblyContaining<UserDtoValidator>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 //first build the db so
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("UserDatabase")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("UserDatabase")));
 
 //for the authorization bearer
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

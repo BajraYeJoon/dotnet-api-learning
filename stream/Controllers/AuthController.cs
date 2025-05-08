@@ -1,7 +1,9 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using stream.Entities;
 using stream.Models;
 using stream.Services;
 
@@ -11,7 +13,7 @@ namespace stream.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController(IAuthService authService, IValidator<SignUpDto> registerValidator, IValidator<LoginDto> loginValidator) : BaseApiController
+    public class AuthController(IAuthService authService, IValidator<SignUpDto> registerValidator, IValidator<LoginDto> loginValidator, UserManager<User> userManager) : BaseApiController
     {
         [EnableRateLimiting("auth")]
         [HttpPost("sign-up")]
@@ -42,7 +44,7 @@ namespace stream.Controllers
             var responseAfterSignUp = new UserSignUpResponseDto
             {
                 Id = user.Id,
-                Username = user.Username
+                Username = user.UserName
             };
             return ApiOk(responseAfterSignUp, "User created successfully", StatusCodes.Status201Created);
         }
@@ -62,11 +64,37 @@ namespace stream.Controllers
                 return ApiBadRequest<RefreshTokenDto>(errors, "Validation failed", StatusCodes.Status400BadRequest);
             }
 
+            var user = await userManager.FindByNameAsync(request.Username);
+            if (user is null && !user.EmailConfirmed)
+            {
+                return ApiBadRequest<RefreshTokenDto>(
+                    new Dictionary<string, string[]> { { "Email", new[] { "Please verify your email before signing in" } } },
+                    "Email not verified",
+                    StatusCodes.Status403Forbidden
+                );
+            }
+
+
             var token = await authService.LoginAsync(request);
             if (token is null)
                 return ApiBadRequest<RefreshTokenDto>("Invalid credentials", "Please check your username and password", StatusCodes.Status401Unauthorized);
 
+
             return ApiOk(token, "Login successful");
+        }
+
+        [HttpGet("verify-email")]
+        public async Task<IActionResult> VerifyEmail(string userId, string token)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user is null)
+                return ApiBadRequest<object>("User not found", "Please check your userId", StatusCodes.Status404NotFound);
+
+            var result = await userManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded)
+                return ApiOk<object>("Email verified", "Email verified successfully", StatusCodes.Status200OK);
+
+            return ApiBadRequest<object>("Email verification failed", "Please check your token", StatusCodes.Status400BadRequest);
         }
 
 

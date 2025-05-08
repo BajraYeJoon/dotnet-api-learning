@@ -11,11 +11,11 @@ using System.Text;
 
 namespace stream.Services
 {
-    public class AuthService(AppDbContext context, IConfiguration configuration) : IAuthService
+    public class AuthService(AppDbContext context, IConfiguration configuration, UserManager<User> userManager, IEmailSenderService emailSenderService) : IAuthService
     {
         public async Task<RefreshTokenDto?> LoginAsync(LoginDto request)
         {
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
+            var user = await context.Users.FirstOrDefaultAsync(u => u.UserName == request.Username);
             if (user is null)
                 return null;
 
@@ -45,20 +45,58 @@ namespace stream.Services
 
         public async Task<User?> RegisterAsync(SignUpDto request)
         {
-            if (await context.Users.AnyAsync(n => n.Username == request.Username))
+
+            //check if user already exists
+            // if (await userManager.FindByNameAsync(request.Username) != null)
+            // {
+            //     return null;
+            // }
+
+            // init user
+            var user = new User
+            {
+                UserName = request.Username,
+                Email = request.Email
+            };
+
+            //now create 
+            var result = await userManager.CreateAsync(user, request.Password);
+            if (!result.Succeeded)
                 return null;
 
+            // get the token
+            var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
 
-            var user = new User();
-            var hashedPassword = new PasswordHasher<User>()
-                .HashPassword(user, request.Password);
-            user.Username = request.Username;
-            user.PasswordHash = hashedPassword;
+            // build link
+            var confirmationLink = $"http://localhost:5251/api/auth/verify-email?userId={user.Id}&token={Uri.EscapeDataString(token)}";
 
-            context.Users.Add(user);
-            await context.SaveChangesAsync();
+            //send the mail
+            await emailSenderService.SendEmailAsync(
+              user.Email!,
+              "Confirm your email",
+              $"Please confirm your email by clicking on the link: <a href='{confirmationLink}'>Confirm</a>"
+            );
 
             return user;
+
+
+
+            // this is replaced with the aspnet.core identity
+
+            // if (await context.Users.AnyAsync(n => n.UserName == request.Username))
+            //     return null;
+
+
+            // var user = new User();
+            // var hashedPassword = new PasswordHasher<User>()
+            //     .HashPassword(user, request.Password);
+            // user.UserName = request.Username;
+            // user.PasswordHash = hashedPassword;
+
+            // context.Users.Add(user);
+            // await context.SaveChangesAsync();
+
+            // return user;
         }
 
         public async Task<RefreshTokenDto?> RefreshTokenAsync(RefreshTokenRequestDto request)
@@ -106,7 +144,7 @@ namespace stream.Services
             //create claims for the token 
             var claims = new List<Claim>
             {
-                new(ClaimTypes.Name, user.Username),
+                new(ClaimTypes.Name, user.UserName),
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(ClaimTypes.Role, user.Roles)
             };

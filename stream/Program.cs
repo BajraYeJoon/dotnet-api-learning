@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
@@ -9,6 +10,7 @@ using FluentValidation;
 using stream.validators;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
+using stream.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +25,23 @@ builder.Services.AddOpenApi();
 //first build the db so
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("UserDatabase")));
+
+builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
+{
+    options.SignIn.RequireConfirmedEmail = true;
+
+    // Make usernames case-sensitive
+    options.User.RequireUniqueEmail = true;
+
+    // For debugging - lower password requirements temporarily
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredLength = 6;
+})
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();
 
 //for the authorization bearer
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -73,6 +92,8 @@ builder.Services.AddRateLimiter(options =>
 
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+// need scope for the email 
+builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
 
 var app = builder.Build();
 

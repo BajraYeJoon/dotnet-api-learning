@@ -28,5 +28,27 @@ namespace stream.Controllers
                 Errors = errors as Dictionary<string, string[]>,
             });
         }
+
+        protected IActionResult ApiUnauthorized<T>(string message = "Unauthorized", object? errors = null)
+        {
+            return Unauthorized(new ApiResponse<T>
+            {
+                Success = false,
+                Message = message,
+                Errors = errors as Dictionary<string, string[]>,
+                StatusCode = StatusCodes.Status401Unauthorized
+            });
+        }
+
+        protected IActionResult ApiNotFound<T>(string message = "Not found", object? errors = null)
+        {
+            return NotFound(new ApiResponse<T>
+            {
+                Success = false,
+                Message = message,
+                Errors = errors as Dictionary<string, string[]>,
+                StatusCode = StatusCodes.Status404NotFound
+            });
+        }
     }
 }

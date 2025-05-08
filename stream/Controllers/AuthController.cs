@@ -1,15 +1,19 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using stream.Models;
 using stream.Services;
 
 namespace stream.Controllers
 {
+    [EnableRateLimiting("anti-spam")]
+
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController(IAuthService authService, IValidator<SignUpDto> registerValidator, IValidator<LoginDto> loginValidator) : BaseApiController
     {
+        [EnableRateLimiting("auth")]
         [HttpPost("sign-up")]
         public async Task<IActionResult> SignUp(SignUpDto request)
         {
@@ -42,6 +46,7 @@ namespace stream.Controllers
             };
             return ApiOk(responseAfterSignUp, "User created successfully", StatusCodes.Status201Created);
         }
+        [EnableRateLimiting("auth")]
         [HttpPost("sign-in")]
         public async Task<IActionResult> SignIn(LoginDto request)
         {

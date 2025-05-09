@@ -1,15 +1,16 @@
 using System.Net;
 using System.Net.Mail;
+using Core.Interfaces;
 using Microsoft.Extensions.Configuration;
 
-namespace stream.Services
+namespace Infrastructure.Services
 {
-    public class EmailSenderService: IEmailSenderService
+    public class EmailSenderService : IEmailSenderService
     {
         //Di for config
         private readonly IConfiguration _configuration;
 
-        public EmailSenderService(IConfiguration  configuration)
+        public EmailSenderService(IConfiguration configuration)
         {
             _configuration = configuration;
         }

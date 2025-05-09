@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Core.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using stream.Entities;
 
-namespace stream.Data
+namespace Infrastructure.Persistence
 {
     public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
     {

@@ -1,15 +1,17 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Core.DTOs;
+using Core.Entities;
+using Core.Interfaces;
+using Infrastructure.Persistence;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using stream.Data;
-using stream.Entities;
-using stream.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace stream.Services
+namespace Infrastructure.Services
 {
     public class AuthService(AppDbContext context, IConfiguration configuration, UserManager<User> userManager, IEmailSenderService emailSenderService) : IAuthService
     {
@@ -150,7 +152,7 @@ namespace stream.Services
             };
 
             //generate key
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetValue<string>("AppSettings:Token")!));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["AppSettings:Token"]!));
 
             //now here's the things
             //create credentials
@@ -158,8 +160,8 @@ namespace stream.Services
 
             //now create a token of jwt
             var token = new JwtSecurityToken(
-                issuer: configuration.GetValue<string>("AppSettings:Issuer"),
-                audience: configuration.GetValue<string>("AppSettings:Audience"),
+                issuer: configuration["AppSettings:Issuer"],
+                audience: configuration["AppSettings:Audience"],
                 claims: claims,
                 expires: DateTime.Now.AddDays(1),
                 signingCredentials: creds
@@ -169,6 +171,6 @@ namespace stream.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-      
+
     }
 }

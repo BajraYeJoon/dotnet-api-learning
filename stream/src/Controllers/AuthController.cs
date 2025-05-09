@@ -3,11 +3,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using stream.Entities;
-using stream.Models;
-using stream.Services;
+using Stream.Core.DTOs;
+using Core.DTOs;
+using Core.Interfaces;
+using Core.Entities;
 
-namespace stream.Controllers
+namespace API.Controllers
 {
     [EnableRateLimiting("anti-spam")]
 
@@ -65,14 +66,26 @@ namespace stream.Controllers
             }
 
             var user = await userManager.FindByNameAsync(request.Username);
-            if (user is null && !user.EmailConfirmed)
+            // Fix the null check logic
+            if (user is null)
+            {
+                return ApiBadRequest<RefreshTokenDto>(
+                    new Dictionary<string, string[]> { { "Username", new[] { "User not found" } } },
+                    "Invalid credentials",
+                    StatusCodes.Status401Unauthorized
+                );
+            }
+
+            if (!user.EmailConfirmed)
             {
                 return ApiBadRequest<RefreshTokenDto>(
                     new Dictionary<string, string[]> { { "Email", new[] { "Please verify your email before signing in" } } },
                     "Email not verified",
                     StatusCodes.Status403Forbidden
                 );
+
             }
+
 
 
             var token = await authService.LoginAsync(request);

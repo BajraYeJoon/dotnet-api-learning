@@ -1,7 +1,7 @@
-﻿using stream.Entities;
-using stream.Models;
+using Core.Entities;
+using Core.DTOs;
 
-namespace stream.Services
+namespace Core.Interfaces
 {
     public interface IAuthService
     {

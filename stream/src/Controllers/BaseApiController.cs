@@ -1,18 +1,18 @@
+using Core.DTOs;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using stream.Models;
+using Stream.Core.DTOs;
 
-namespace stream.Controllers
+namespace API.Controllers
 {
-    public class BaseApiController: ControllerBase
+    public class BaseApiController : ControllerBase
     {
         protected IActionResult ApiOk<T>(T data, string message = "Success", int? statusCode = null)
         {
             return Ok(new ApiResponse<T>
             {
 
-                Success = true,
-                Message= message,
+                Message = message,
                 StatusCode = statusCode ?? StatusCodes.Status200OK,
                 Data = data,
             });

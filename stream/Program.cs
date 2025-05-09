@@ -4,13 +4,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
-using stream.Data;
-using stream.Services;
 using FluentValidation;
-using stream.validators;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
-using stream.Entities;
+using Core.Validators;
+using Infrastructure.Persistence;
+using Core.Entities;
+using Core.Interfaces;
+using Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,13 +50,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-                ValidateIssuer = true,
-                ValidIssuer = builder.Configuration["AppSettings:Issuer"],
-                ValidateAudience = true,
-                ValidAudience = builder.Configuration["AppSettings:Audience"],
-                ValidateIssuerSigningKey = true,
-                ValidateLifetime = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes((builder.Configuration["AppSettings:Token"]!)))
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["AppSettings:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["AppSettings:Audience"],
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes((builder.Configuration["AppSettings:Token"]!)))
         };
     });
 

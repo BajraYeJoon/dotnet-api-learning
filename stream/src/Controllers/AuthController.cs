@@ -86,8 +86,6 @@ namespace API.Controllers
 
             }
 
-
-
             var token = await authService.LoginAsync(request);
             if (token is null)
                 return ApiBadRequest<RefreshTokenDto>("Invalid credentials", "Please check your username and password", StatusCodes.Status401Unauthorized);

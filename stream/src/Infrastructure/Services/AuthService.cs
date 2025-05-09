@@ -58,7 +58,8 @@ namespace Infrastructure.Services
             var user = new User
             {
                 UserName = request.Username,
-                Email = request.Email
+                Email = request.Email,
+                Role = Roles.User
             };
 
             //now create 
@@ -66,6 +67,7 @@ namespace Infrastructure.Services
             if (!result.Succeeded)
                 return null;
 
+            await userManager.AddToRoleAsync(user, Roles.User);
             // get the token
             var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
 
@@ -148,7 +150,7 @@ namespace Infrastructure.Services
             {
                 new(ClaimTypes.Name, user.UserName),
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new(ClaimTypes.Role, user.Roles)
+                new(ClaimTypes.Role, user.Role)
             };
 
             //generate key

@@ -12,6 +12,7 @@ using Infrastructure.Persistence;
 using Core.Entities;
 using Core.Interfaces;
 using Infrastructure.Services;
+using Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -101,6 +102,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    await SuperAdminSeeder.SeedSuperAdminAsync(app.Services);
     app.MapOpenApi();
     app.MapScalarApiReference();
 }

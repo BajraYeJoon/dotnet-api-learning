@@ -2,7 +2,7 @@ using Core.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers.User
+namespace Controllers
 {
     [Authorize(Roles = Roles.User)]
     [Route("api/user")]

@@ -1,31 +1,36 @@
 using Core.DTOs;
 using Core.Entities;
+using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers.SuperAdmin
+namespace Controllers
 {
     [Authorize(Roles = Roles.SuperAdmin)]
-    [Route("api/superadmin")]
+    [Route("api/super-admin")]
     [ApiController]
-    public class SuperAdminController : BaseApiController
+    public class SuperAdminController(ISuperAdminService superAdminService) : BaseApiController
     {
-        // Constructor with dependencies
-
-        [HttpPost("create-manager")]
+        [HttpPost("managers")]
         public async Task<IActionResult> CreateManager([FromBody] CreateManagerDto request)
         {
-            // Logic to create a manager
-            // This should create a user with Manager role and assign blocks
+            var manager = await superAdminService.CreateManagerAsync(request);
+            if (manager == null)
+                return ApiBadRequest<object>(
+                    "Failed to create manager",
+                    "Manager creation failed",
+                    StatusCodes.Status400BadRequest);
 
-            return ApiOk("Manager created successfully");
+            return ApiOk(
+                new { Id = manager.Id, Username = manager.UserName },
+                "Manager created successfully",
+                StatusCodes.Status201Created);
         }
 
-        [HttpGet("managers")]
-        public async Task<IActionResult> GetManagers()
+        [HttpGet("test")]
+        public IActionResult Test()
         {
-            // Get all managers
-            return ApiOk("List of managers");
+            return Ok("SuperAdmin route is working!");
         }
     }
 }

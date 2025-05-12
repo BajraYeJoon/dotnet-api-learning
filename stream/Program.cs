@@ -94,6 +94,7 @@ builder.Services.AddRateLimiter(options =>
 
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ISuperAdminService, SuperAdminService>();
 // need scope for the email 
 builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
 
@@ -110,9 +111,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseRateLimiter();
-
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

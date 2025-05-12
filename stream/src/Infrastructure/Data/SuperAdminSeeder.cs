@@ -17,9 +17,17 @@ namespace Infrastructure.Data
                 var roleManager = scopeProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
                 var logger = scopeProvider.GetRequiredService<ILogger<User>>();
 
-                //create the superadmin role    
+                //create the roles
                 if (!await roleManager.RoleExistsAsync(Roles.SuperAdmin))
                     await roleManager.CreateAsync(new IdentityRole<Guid>(Roles.SuperAdmin));
+
+                // Create the Manager role too
+                if (!await roleManager.RoleExistsAsync(Roles.Manager))
+                    await roleManager.CreateAsync(new IdentityRole<Guid>(Roles.Manager));
+
+                // Create the User role too
+                if (!await roleManager.RoleExistsAsync(Roles.User))
+                    await roleManager.CreateAsync(new IdentityRole<Guid>(Roles.User));
 
                 var superAdminEmail = "superadmin@bajra.com";
                 var superAdmin = await userManager.FindByEmailAsync(superAdminEmail);

@@ -3,10 +3,10 @@ using Core.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers.Manager
+namespace Controllers
 {
     [Authorize(Roles = Roles.Manager)]
-    [Route("api/manager")]
+    [Route("api/managers")]
     [ApiController]
     public class ManagerController : BaseApiController
     {

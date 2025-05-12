@@ -6,15 +6,14 @@ using Microsoft.AspNetCore.RateLimiting;
 using Stream.Core.DTOs;
 using Core.DTOs;
 using Core.Interfaces;
-using Core.Entities;
 
-namespace API.Controllers
+namespace Controllers
 {
     [EnableRateLimiting("anti-spam")]
 
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController(IAuthService authService, IValidator<SignUpDto> registerValidator, IValidator<LoginDto> loginValidator, UserManager<User> userManager) : BaseApiController
+    public class AuthController(IAuthService authService, IValidator<SignUpDto> registerValidator, IValidator<LoginDto> loginValidator, UserManager<Core.Entities.User> userManager) : BaseApiController
     {
         [EnableRateLimiting("auth")]
         [HttpPost("sign-up")]

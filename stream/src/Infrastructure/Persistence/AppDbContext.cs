@@ -11,6 +11,12 @@ namespace Infrastructure.Persistence
             : base(options)
         {
         }
+
+        public DbSet<Block> Blocks { get; set; }
+        public DbSet<Floor> Floors { get; set; }
+        public DbSet<Flat> Flats { get; set; }
+        public DbSet<House> Houses { get; set; }
+
         // public DbSet<User> Users { get; set; } 
         // DbSet<TUser> Users
         // DbSet<TRole> Roles

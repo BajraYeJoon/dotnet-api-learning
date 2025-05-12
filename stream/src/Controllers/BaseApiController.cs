@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Stream.Core.DTOs;
 
-namespace API.Controllers
+namespace Controllers
 {
     public class BaseApiController : ControllerBase
     {

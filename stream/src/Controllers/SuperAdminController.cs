@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Controllers
 {
-    [Authorize(Roles = Roles.SuperAdmin)]
-    [Route("api/super-admin")]
+    [Authorize(Roles = "SuperAdmin")]
+    [Route("api/[controller]")]
     [ApiController]
     public class SuperAdminController(ISuperAdminService superAdminService) : BaseApiController
     {

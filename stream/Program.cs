@@ -46,7 +46,12 @@ builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
 .AddDefaultTokenProviders();
 
 //for the authorization bearer
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(opt =>
+{
+    // required when combined with jwt and asp identity
+    opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -57,7 +62,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = builder.Configuration["AppSettings:Audience"],
             ValidateIssuerSigningKey = true,
             ValidateLifetime = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes((builder.Configuration["AppSettings:Token"]!)))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes((builder.Configuration["AppSettings:Token"]!))),
+            RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+
+
+
         };
     });
 
@@ -109,9 +118,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseRateLimiter();
 app.MapControllers();
 app.Run();

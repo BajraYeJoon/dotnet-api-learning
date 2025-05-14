@@ -20,7 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 // In Program.cs or Startup.cs
-builder.Services.AddValidatorsFromAssemblyContaining<UserDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<ValidationAssemblyMarker>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -107,6 +107,17 @@ builder.Services.AddScoped<ISuperAdminService, SuperAdminService>();
 // need scope for the email 
 builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
 
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy("DevCorsPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -116,6 +127,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
+
+app.UseCors("DevCorsPolicy");
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

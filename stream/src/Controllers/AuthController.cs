@@ -35,8 +35,8 @@ namespace Controllers
             if (user is null)
             {
                 return ApiBadRequest<UserSignUpResponseDto>(
-                    new Dictionary<string, string[]> { { "Username", new[] { "User already exists" } } },
-                    "User already exists",
+                    new Dictionary<string, string[]> { { "Email", new[] { "Email already exists" } } },
+                    "Email already exists",
                     StatusCodes.Status409Conflict
                 );
             }
@@ -44,7 +44,7 @@ namespace Controllers
             var responseAfterSignUp = new UserSignUpResponseDto
             {
                 Id = user.Id,
-                Username = user.UserName
+                Email = user.Email,
             };
             return ApiOk(responseAfterSignUp, "User created successfully", StatusCodes.Status201Created);
         }
@@ -64,12 +64,12 @@ namespace Controllers
                 return ApiBadRequest<RefreshTokenDto>(errors, "Validation failed", StatusCodes.Status400BadRequest);
             }
 
-            var user = await userManager.FindByNameAsync(request.Username);
+            var user = await userManager.FindByEmailAsync(request.Email);
             // Fix the null check logic
             if (user is null)
             {
                 return ApiBadRequest<RefreshTokenDto>(
-                    new Dictionary<string, string[]> { { "Username", new[] { "User not found" } } },
+                    new Dictionary<string, string[]> { { "Email", new[] { "Email not found" } } },
                     "Invalid credentials",
                     StatusCodes.Status401Unauthorized
                 );
@@ -87,7 +87,7 @@ namespace Controllers
 
             var token = await authService.LoginAsync(request);
             if (token is null)
-                return ApiBadRequest<RefreshTokenDto>("Invalid credentials", "Please check your username and password", StatusCodes.Status401Unauthorized);
+                return ApiBadRequest<RefreshTokenDto>("Invalid credentials", "Please check your email and password", StatusCodes.Status401Unauthorized);
 
 
             return ApiOk(token, "Login successful");

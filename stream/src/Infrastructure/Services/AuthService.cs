@@ -17,7 +17,7 @@ namespace Infrastructure.Services
     {
         public async Task<RefreshTokenDto?> LoginAsync(LoginDto request)
         {
-            var user = await context.Users.FirstOrDefaultAsync(u => u.UserName == request.Username);
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
             if (user is null)
                 return null;
 
@@ -49,10 +49,10 @@ namespace Infrastructure.Services
         {
 
             //check if user already exists
-            // if (await userManager.FindByNameAsync(request.Username) != null)
-            // {
-            //     return null;
-            // }
+            if (await userManager.FindByEmailAsync(request.Email) != null)
+            {
+                return null;
+            }
 
             // init user
             var user = new User

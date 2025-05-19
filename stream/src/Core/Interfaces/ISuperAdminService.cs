@@ -6,6 +6,7 @@ namespace Core.Interfaces
     public interface ISuperAdminService
     {
         Task<User?> CreateManagerAsync(CreateManagerDto request);
+        Task<IEnumerable<ManagerResponseDto>> GetAllManagersAsync();
         // Task<List<ManagerDto>> GetAllManagersAsync();
         // Task<bool> DeleteManagerAsync(Guid managerId);
 

@@ -28,17 +28,55 @@ namespace Controllers
                 return ApiBadRequest<CreateManagerDto>(errors, "Validation Failed For Manager Creation");
             }
 
-            var manager = await superAdminService.CreateManagerAsync(request);
-            if (manager == null)
-                return ApiBadRequest<object>(
-                    "Failed to create manager",
-                    "Manager creation failed",
-                    StatusCodes.Status400BadRequest);
+            try
+            {
+                var manager = await superAdminService.CreateManagerAsync(request);
 
-            return ApiOk(
-                new { Id = manager.Id, Username = manager.UserName },
-                "Manager created successfully",
-                StatusCodes.Status201Created);
+                if (manager == null)
+                    return ApiBadRequest<object>(
+                        "Failed to create manager",
+                        "Manager creation failed",
+                        StatusCodes.Status400BadRequest);
+
+                return ApiOk(
+                    new { Id = manager.Id, Username = manager.UserName },
+                    "Manager created successfully",
+                    StatusCodes.Status201Created);
+            }
+            catch (Exception ex)
+            {
+
+                return ApiBadRequest<object>(
+                    new Dictionary<string, string[]>
+                    {
+                        ["error"] = ["An unexpected error occurred while creating the manager"]
+                    },
+                    "Manager creation failed",
+                    StatusCodes.Status500InternalServerError);
+            }
+        }
+        [HttpGet("managers")]
+        public async Task<IActionResult> GetAllManagers()
+        {
+            try
+            {
+                var managers = await superAdminService.GetAllManagersAsync();
+
+                return ApiOk(
+                   managers,
+                   "Managers retrieved successfully",
+                   StatusCodes.Status200OK);
+            }
+            catch (Exception ex)
+            {
+                return ApiBadRequest<object>(
+      new Dictionary<string, string[]>
+      {
+          ["error"] = ["An unexpected error occurred while retrieving managers"]
+      },
+      "Failed to retrieve managers",
+      StatusCodes.Status500InternalServerError);
+            }
         }
 
         [HttpGet("test")]
@@ -47,4 +85,7 @@ namespace Controllers
             return Ok("SuperAdmin route is working!");
         }
     }
+
+
+
 }

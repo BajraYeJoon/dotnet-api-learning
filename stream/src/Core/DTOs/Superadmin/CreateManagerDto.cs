@@ -6,6 +6,6 @@ namespace Core.DTOs
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
 
-        public List<Guid> AssignedBlocksIds { get; set; } = [];
+        public List<Guid>? AssignedBlocksIds { get; set; }
     }
 }

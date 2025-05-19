@@ -81,5 +81,45 @@ namespace Infrastructure.Services
             }
 
         }
+
+
+        // get all managers 
+        public async Task<IEnumerable<ManagerResponseDto>> GetAllManagersAsync()
+        {
+            var managers = await userManager.GetUsersInRoleAsync(Roles.Manager);
+
+            if (!managers.Any())
+            {
+                return Enumerable.Empty<ManagerResponseDto>();
+            }
+
+            var managerIds = managers.Select(m => m.Id).ToList();
+            var blocksQuery = dbContext.Blocks
+                .Where(b => managerIds.Contains(b.ManagerId));
+
+            var blocksByManager = await blocksQuery
+             .GroupBy(b => b.ManagerId)
+             .ToDictionaryAsync(
+                g => g.Key,
+                g => g.Select(b => new BlockDto
+
+                {
+                    Id = b.Id,
+                    BlockName = b.BlockName,
+                    PropertyType = b.PropertyType
+                }).ToList()
+             );
+
+
+            return managers.Select(m => new ManagerResponseDto
+            {
+                Username = m.UserName,
+                Email = m.Email,
+                Role = m.Role,
+                ManagedBlocks = blocksByManager.TryGetValue(m.Id, out var blocks) ? blocks : []
+            });
+
+        }
+
     }
 }

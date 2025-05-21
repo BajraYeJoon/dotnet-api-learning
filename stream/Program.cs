@@ -18,7 +18,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(opt =>
+    {
+        opt.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
+
 // In Program.cs or Startup.cs
 builder.Services.AddValidatorsFromAssemblyContaining<ValidationAssemblyMarker>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -106,6 +111,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISuperAdminService, SuperAdminService>();
 // need scope for the email 
 builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
+builder.Services.AddScoped<IBlockService, BlockService>();
 
 builder.Services.AddCors(opt =>
 {

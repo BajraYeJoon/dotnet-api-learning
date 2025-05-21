@@ -94,11 +94,11 @@ namespace Infrastructure.Services
             }
 
             var managerIds = managers.Select(m => m.Id).ToList();
-            var blocksQuery = dbContext.Blocks
-                .Where(b => managerIds.Contains(b.ManagerId));
+            var blocksQuery = dbContext.Blocks.Where(b => b.ManagerId.HasValue && managerIds.Contains(b.ManagerId.Value));
+
 
             var blocksByManager = await blocksQuery
-             .GroupBy(b => b.ManagerId)
+             .GroupBy(b => b.ManagerId.Value)
              .ToDictionaryAsync(
                 g => g.Key,
                 g => g.Select(b => new BlockDto

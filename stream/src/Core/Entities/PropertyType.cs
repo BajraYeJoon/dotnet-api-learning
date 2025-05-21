@@ -4,6 +4,5 @@ namespace Core.Entities
     {
         Apartment,
         Housing,
-        Mixed
     }
 }

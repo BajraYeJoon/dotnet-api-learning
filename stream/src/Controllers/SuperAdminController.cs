@@ -19,13 +19,10 @@ namespace Controllers
             var managerValidation = await managerValidator.ValidateAsync(request);
             if (!managerValidation.IsValid)
             {
-                var errors = managerValidation.Errors
-                    .GroupBy(e => e.PropertyName)
-                    .ToDictionary(
-                        g => g.Key,
-                        g => g.Select(e => e.ErrorMessage).ToArray()
-                    );
-                return ApiBadRequest<CreateManagerDto>(errors, "Validation Failed For Manager Creation");
+                return ApiBadRequest<object>(
+                    FormatValidationErrors(managerValidation),
+                    "Validation failed",
+                    StatusCodes.Status400BadRequest);
             }
 
             try

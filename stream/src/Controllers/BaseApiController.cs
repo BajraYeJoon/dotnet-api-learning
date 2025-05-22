@@ -1,21 +1,29 @@
 using Core.DTOs;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Stream.Core.DTOs;
+using FluentValidation.Results;
 
 namespace Controllers
 {
-    public class BaseApiController : ControllerBase
+    public abstract class BaseApiController : ControllerBase
     {
         protected IActionResult ApiOk<T>(T data, string message = "Success", int? statusCode = null)
         {
             return Ok(new ApiResponse<T>
             {
-
+                Success = true,
                 Message = message,
                 StatusCode = statusCode ?? StatusCodes.Status200OK,
                 Data = data,
             });
+        }
+        protected static Dictionary<string, string[]> FormatValidationErrors(ValidationResult validationResult)
+        {
+            return validationResult.Errors
+                .GroupBy(e => e.PropertyName)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(e => e.ErrorMessage).ToArray()
+                );
         }
 
         protected IActionResult ApiBadRequest<T>(object errors, string message = "BadRequest", int? statusCode = null)

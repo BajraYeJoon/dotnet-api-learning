@@ -22,13 +22,11 @@ namespace Controllers
             var validationResult = await registerValidator.ValidateAsync(request);
             if (!validationResult.IsValid)
             {
-                var errors = validationResult.Errors
-                    .GroupBy(e => e.PropertyName)
-                    .ToDictionary(
-                        g => g.Key,
-                        g => g.Select(e => e.ErrorMessage).ToArray()
-                    );
-                return ApiBadRequest<UserSignUpResponseDto>(errors, "Validation failed", StatusCodes.Status400BadRequest);
+                return ApiBadRequest<UserSignUpResponseDto>(
+                     FormatValidationErrors(validationResult),
+                     "Validation failed",
+                     StatusCodes.Status400BadRequest
+                 );
             }
 
             var user = await authService.RegisterAsync(request);
@@ -55,13 +53,11 @@ namespace Controllers
             var validationResult = await loginValidator.ValidateAsync(request);
             if (!validationResult.IsValid)
             {
-                var errors = validationResult.Errors
-                    .GroupBy(e => e.PropertyName)
-                    .ToDictionary(
-                        g => g.Key,
-                        g => g.Select(e => e.ErrorMessage).ToArray()
-                    );
-                return ApiBadRequest<RefreshTokenDto>(errors, "Validation failed", StatusCodes.Status400BadRequest);
+                return ApiBadRequest<RefreshTokenDto>(
+                     FormatValidationErrors(validationResult),
+                     "Validation failed",
+                     StatusCodes.Status400BadRequest
+                 );
             }
 
             var user = await userManager.FindByEmailAsync(request.Email);

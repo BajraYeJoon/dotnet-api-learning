@@ -10,9 +10,19 @@ namespace Core.DTOs
         public Guid? ManagerId { get; set; }
 
         public string? ManagerName { get; set; }
+
+        public List<FloorDto> Floors { get; set; }
+        public List<HouseDto> Houses { get; set; }
     }
 
     public class CreateBlockDto
+    {
+        public string BlockName { get; set; } = string.Empty;
+        public PropertyType PropertyType { get; set; }
+        public Guid? ManagerId { get; set; }
+    }
+
+    public class UpdateBlockDto
     {
         public string BlockName { get; set; } = string.Empty;
         public PropertyType PropertyType { get; set; }

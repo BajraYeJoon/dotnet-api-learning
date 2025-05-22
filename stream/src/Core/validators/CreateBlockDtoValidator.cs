@@ -3,6 +3,7 @@ using FluentValidation;
 
 namespace Core.Validators
 {
+
     public class CreateBlockDtoValidator : AbstractValidator<CreateBlockDto>
     {
         public CreateBlockDtoValidator()
@@ -33,6 +34,27 @@ namespace Core.Validators
                 .NotEmpty().WithMessage("Manager ID is required")
                 .Must(x => x != Guid.Empty)
                 .WithMessage("Manager ID must be a valid ID");
+        }
+    }
+
+    public class UpdateBlockValidator : AbstractValidator<UpdateBlockDto>
+    {
+        public UpdateBlockValidator()
+        {
+            RuleFor(x => x.BlockName)
+                .NotEmpty().WithMessage("Block Name is required.")
+                .Length(2, 50).WithMessage("Block name must be between 2 and 50 characters")
+
+                .Must(name => name.Trim() == name).WithMessage("Block name must not start or end with spaces")
+                ;
+
+            RuleFor(x => x.PropertyType)
+                .IsInEnum()
+                .WithMessage("PropertyType must be a valid value (Apartment, Housing, or Mixed).");
+
+            RuleFor(x => x.ManagerId)
+               .Must(x => x is null || x != Guid.Empty)
+               .WithMessage("Must be a valid manager Id");
         }
     }
 

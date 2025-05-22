@@ -43,18 +43,68 @@ namespace Infrastructure.Services
             return await GetBlockDtoById(block.Id);
         }
 
+
+        public async Task<BlockDto> UpdateBlockAsync(Guid blockId, UpdateBlockDto updateBlock)
+        {
+            var block = await appDbContext.Blocks.FindAsync(blockId) ?? throw new ArgumentException("Block not found");
+
+            if (updateBlock.ManagerId.HasValue)
+            {
+                if (updateBlock.ManagerId.Value != Guid.Empty)
+                {
+                    var manager = await userManager.FindByIdAsync(updateBlock.ManagerId.Value.ToString()) ?? throw new ArgumentException("The manager for this id does not exist");
+
+                    var roles = await userManager.GetRolesAsync(manager);
+                    if (!roles.Contains(Roles.Manager))
+                    {
+                        throw new ArgumentException("This user is not a manager");
+                    }
+
+                    block.ManagerId = updateBlock.ManagerId.Value;
+                }
+                else
+                {
+                    block.ManagerId = null;
+                }
+
+
+            }
+            block.BlockName = updateBlock.BlockName;
+            block.PropertyType = updateBlock.PropertyType;
+
+            appDbContext.Blocks.Update(block);
+            await appDbContext.SaveChangesAsync();
+
+            return await GetBlockDtoById(block.Id);
+
+        }
         /// <summary>
         /// Helper method to get block DTO with manager information
         /// </summary>
         private async Task<BlockDto> GetBlockDtoById(Guid blockId)
         {
-            var block = await appDbContext.Blocks.FindAsync(blockId);
+            // Fetch the block entity from the database
+            // Important: Include related entities if you want to display their data in the DTO
+            var block = await appDbContext.Blocks
+                // .Include(b => b.Manager) // If you had a direct navigation property to a User entity for manager
+                .Include(b => b.Floors)  // If you want to include floor information
+                .Include(b => b.Houses)  // If you want to include house information
+                .FirstOrDefaultAsync(b => b.Id == blockId);
 
-            string? managerName = null;
-            if (block is not null && block.ManagerId != Guid.Empty)
+            if (block == null)
             {
-                var manager = await userManager.FindByIdAsync(block.ManagerId.ToString());
-                managerName = manager?.UserName;
+                return null; // Or throw not found
+            }
+
+            string managerName = null;
+            // If ManagerId is present, try to get the manager's name
+            if (block.ManagerId.HasValue && block.ManagerId.Value != Guid.Empty)
+            {
+                var managerUser = await userManager.FindByIdAsync(block.ManagerId.Value.ToString());
+                if (managerUser != null)
+                {
+                    managerName = managerUser.UserName; // Or FullName, etc.
+                }
             }
 
             return new BlockDto
@@ -64,6 +114,7 @@ namespace Infrastructure.Services
                 PropertyType = block.PropertyType,
                 ManagerId = block.ManagerId == Guid.Empty ? null : block.ManagerId,
                 ManagerName = managerName
+
             };
 
         }

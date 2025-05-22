@@ -13,6 +13,8 @@ using Core.Entities;
 using Core.Interfaces;
 using Infrastructure.Services;
 using Infrastructure.Data;
+using Core.DTOs;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 

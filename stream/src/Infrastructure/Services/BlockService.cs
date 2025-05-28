@@ -9,6 +9,57 @@ namespace Infrastructure.Services
 {
     public class BlockService(AppDbContext appDbContext, UserManager<User> userManager) : IBlockService
     {
+        public async Task<IEnumerable<BlockDto>> GetAllBlocksAsync()
+        {
+            var blockEntities = await appDbContext.Blocks
+              .Include(b => b.Floors)
+              .Include(b => b.Houses)
+              .ToListAsync();
+
+            if (blockEntities.Count == 0)
+            {
+                return [];
+            }
+
+            var managerIds = blockEntities
+                .Where(b => b.ManagerId.HasValue && b.ManagerId.Value != Guid.Empty)
+                .Select(b => b.ManagerId.Value)
+                .Distinct()
+                .ToList();
+
+            var managersDict = new Dictionary<Guid, string>();
+            if (managerIds.Count > 0)
+            {
+                var managers = await userManager.Users
+                .Where(u => managerIds.Contains(u.Id))
+                .ToListAsync();
+
+                managersDict = managers.ToDictionary(m => m.Id, m => m.UserName);
+            }
+            var blockDtos = blockEntities.Select(block =>
+             {
+                 string managerName = null;
+                 if (block.ManagerId.HasValue && managersDict.TryGetValue(block.ManagerId.Value, out var name))
+                 {
+                     managerName = name;
+                 }
+
+                 return new BlockDto
+                 {
+                     Id = block.Id,
+                     BlockName = block.BlockName,
+                     PropertyType = block.PropertyType,
+                     ManagerId = block.ManagerId == Guid.Empty ? null : block.ManagerId,
+                     ManagerName = managerName,
+                     // Assuming FloorDto and HouseDto are defined and BlockDto has these properties
+                     Floors = block.Floors?.Select(f => new FloorDto { Id = f.Id, FloorNumber = f.FloorNumber, BlockId = f.BlockId /*, add other needed FloorDto properties */ }).ToList() ?? new List<FloorDto>(),
+                     Houses = block.Houses?.Select(h => new HouseDto { Id = h.Id, HouseName = h.HouseName, BlockId = h.BlockId /*, add other needed HouseDto properties */ }).ToList() ?? new List<HouseDto>()
+                 };
+             }).ToList();
+
+
+            return blockDtos;
+        }
         public async Task<BlockDto> CreateBlockAsync(CreateBlockDto createBlockDto)
         {
             if (createBlockDto.ManagerId.HasValue)
@@ -38,6 +89,7 @@ namespace Infrastructure.Services
             };
 
             await appDbContext.Blocks.AddAsync(block);
+
             await appDbContext.SaveChangesAsync();
 
             return await GetBlockDtoById(block.Id);
@@ -83,27 +135,24 @@ namespace Infrastructure.Services
         /// </summary>
         private async Task<BlockDto> GetBlockDtoById(Guid blockId)
         {
-            // Fetch the block entity from the database
-            // Important: Include related entities if you want to display their data in the DTO
             var block = await appDbContext.Blocks
-                // .Include(b => b.Manager) // If you had a direct navigation property to a User entity for manager
-                .Include(b => b.Floors)  // If you want to include floor information
-                .Include(b => b.Houses)  // If you want to include house information
+
+                .Include(b => b.Floors)
+                .Include(b => b.Houses)
                 .FirstOrDefaultAsync(b => b.Id == blockId);
 
             if (block == null)
             {
-                return null; // Or throw not found
+                return null;
             }
 
             string managerName = null;
-            // If ManagerId is present, try to get the manager's name
             if (block.ManagerId.HasValue && block.ManagerId.Value != Guid.Empty)
             {
                 var managerUser = await userManager.FindByIdAsync(block.ManagerId.Value.ToString());
                 if (managerUser != null)
                 {
-                    managerName = managerUser.UserName; // Or FullName, etc.
+                    managerName = managerUser.UserName;
                 }
             }
 

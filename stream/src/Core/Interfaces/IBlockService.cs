@@ -4,6 +4,7 @@ namespace Core.Interfaces
 {
     public interface IBlockService
     {
+        Task<IEnumerable<BlockDto>> GetAllBlocksAsync();
         Task<BlockDto> CreateBlockAsync(CreateBlockDto createBlockDto);
         Task<BlockDto> UpdateBlockAsync(Guid blockId, UpdateBlockDto updateBlockDto);
         // Task<bool> DeleteBlockAsync(Guid blockId);

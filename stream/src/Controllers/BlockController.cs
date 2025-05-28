@@ -6,14 +6,35 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Controllers
 {
+    [EnableRateLimiting("auth")]
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(Roles = Roles.SuperAdmin)]
     public class BlockController(IBlockService _blockService, IValidator<CreateBlockDto> _createBlockValidator, IValidator<UpdateBlockDto> _updateBlockValidator) : BaseApiController
     {
+
+        [HttpGet("get-all-blocks")]
+        public async Task<IActionResult> GetAllBlocks()
+        {
+            try
+            {
+                var blocks = await _blockService.GetAllBlocksAsync();
+                if (blocks is null || !blocks.Any())
+                {
+                    return ApiBadRequest<object>(null, "No blocks found", StatusCodes.Status204NoContent);
+                }
+
+                return ApiOk(blocks, "Blocks retrieved successfully", StatusCodes.Status200OK);
+            }
+            catch (Exception ex)
+            {
+                return ApiBadRequest<object>(null, "An error occurred while retrieving blocks.", StatusCodes.Status500InternalServerError);
+            }
+        }
 
         [HttpPost("create-block")]
         public async Task<IActionResult> CreateBlock([FromBody] CreateBlockDto request)

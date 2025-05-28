@@ -139,9 +139,9 @@ if (app.Environment.IsDevelopment())
 app.UseCors("DevCorsPolicy");
 
 app.UseHttpsRedirection();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseRateLimiter();
 app.MapControllers();
 app.Run();
